@@ -1,8 +1,8 @@
 Flask
 pyperclip
-qrcode
 socket
 threading
+qrcode
 subprocess
 platform
 argparse
