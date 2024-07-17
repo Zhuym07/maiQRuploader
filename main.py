@@ -4,13 +4,16 @@ import qrcode
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 import socket
-import win10toast
 import threading
 import subprocess
 import platform
 import argparse
+import winsound
 
 app = Flask(__name__)
+
+
+
 
 def get_local_ip():
     def is_private_ip(ip):
@@ -55,10 +58,6 @@ def print_ascii_qr(matrix):
     for row in matrix:
         print(''.join('██' if cell else '  ' for cell in row))
 
-def show_windows_notification(message):
-    toaster = win10toast.ToastNotifier()
-    toaster.show_toast("复制成功", message, duration=5, threaded=True)
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -66,8 +65,9 @@ def index():
             text = request.form.get('text') or request.form.get('qr_content')
             pyperclip.copy(text)
             print(f"复制的内容: {text}")  # 终端打印日志
-            threading.Thread(target=show_windows_notification, args=(text,)).start()
+            winsound.Beep(660, 150)
             return jsonify({"message": "内容已复制到剪贴板"})
+
     return render_template_string('''
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -261,11 +261,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     hostname = get_local_ip()
-    
 #    print(f"密码: {password}")
 #    print(f"访问地址: http://{hostname}:{args.PORT}/?password={password}")
     print(f"访问地址: http://{hostname}:{args.PORT}")
-
     # 生成并打印ASCII二维码
     qr_matrix = generate_ascii_qr(f"http://{hostname}:{args.PORT}")
     print("扫描以下二维码访问：")
