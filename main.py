@@ -9,6 +9,9 @@ import subprocess
 import platform
 import argparse
 import winsound
+import logging
+from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -64,7 +67,7 @@ def index():
         if 'text' in request.form or 'qr_content' in request.form:
             text = request.form.get('text') or request.form.get('qr_content')
             pyperclip.copy(text)
-            print(f"复制的内容: {text}")  # 终端打印日志
+            print(f"[{datetime.now()}] 写入剪贴板:\ {text}")  # 终端打印日志，包括当前时间
             winsound.Beep(660, 150)
             return jsonify({"message": "内容已复制到剪贴板"})
 
@@ -268,6 +271,8 @@ if __name__ == '__main__':
     qr_matrix = generate_ascii_qr(f"http://{hostname}:{args.PORT}")
     print("扫描以下二维码访问：")
     print_ascii_qr(qr_matrix)
+    
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
     
     app.run(debug=False, port=args.PORT, host='0.0.0.0')
 
