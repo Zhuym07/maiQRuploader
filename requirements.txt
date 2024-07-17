@@ -1,0 +1,9 @@
+Flask
+pyperclip
+qrcode
+socket
+threading
+subprocess
+platform
+argparse
+winsound; platform_system == "Windows"
