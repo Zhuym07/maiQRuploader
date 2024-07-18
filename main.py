@@ -67,10 +67,12 @@ def index():
         if 'text' in request.form or 'qr_content' in request.form:
             text = request.form.get('text') or request.form.get('qr_content')
             pyperclip.copy(text)
-            print(f"[{datetime.now()}] 写入剪贴板:\ {text}")  # 终端打印日志，包括当前时间
+            print(f"[{datetime.now()}] 写入剪贴板: {text}")  # 终端打印日志，包括当前时间
             winsound.Beep(660, 150)
-            return jsonify({"message": "内容已复制到剪贴板"})
-
+            if text.startswith('SGWCMAID'):
+                return jsonify({"message": "🔗 识别到登录链接 已复制到剪贴板"})
+            else:
+                return jsonify({"message": "✅ 内容已复制到剪贴板"})
     return render_template_string('''
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -156,7 +158,7 @@ def index():
                 <form id="textForm">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <textarea class="mdl-textfield__input" type="text" rows="3" id="text" name="text"></textarea>
-                        <label class="mdl-textfield__label" for="text">输入文本...</label>
+                        <label class="mdl-textfield__label" for="text">http(s)://wq.sys-all.cn/qrcode/req/MAIDXXXX...</label>
                     </div>
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">
                         写入剪贴板
@@ -174,7 +176,9 @@ def index():
                     <input type="hidden" name="qr_content" id="qr_content">
                 </form>
             </div>
+                                  
         </main>
+                                  
         <footer class="mdl-layout__content">
             <div style="text-align: center; padding: 20px;">
                 <span>Design X Zhuym</span>
@@ -192,9 +196,21 @@ def index():
             setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 3000);
         }
 
+        function processText(text) {
+            var urlPattern = /^https?:\/\/wq\.sys-all\.cn\/qrcode\/req\/([A-Z0-9]+)\.html\?l=\d+&t=[^&]+(&.*)?$/;
+            var match = text.match(urlPattern);
+            if (match) {
+                return 'SGWC' + match[1];
+            }
+            return text;
+        }
+                                  
         document.getElementById('textForm').addEventListener('submit', function(e) {
             e.preventDefault();
             var formData = new FormData(this);
+            var text = formData.get('text');
+            var processedText = processText(text);
+            formData.set('text', processedText);
             fetch('/', {
                 method: 'POST',
                 body: formData
